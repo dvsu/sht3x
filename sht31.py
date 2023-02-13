@@ -1,5 +1,5 @@
 from typing import Final
-from sht3x.sht3x import SHT3X
+from sht3x.sht3x.sht3x import SHT3X
 
 I2C_ADDRESS: Final[int] = 0x44
 

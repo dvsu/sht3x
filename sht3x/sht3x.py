@@ -2,9 +2,9 @@ import sys
 from time import sleep, time
 from traceback import print_exc
 from dataclasses import asdict
-from typing import Final, Literal, Optional
+from typing import Final, Literal
 from smbus2 import SMBus
-from sht3x.models import Measurement, SensorData, SensorInfo
+from .models import Measurement, SensorData, SensorInfo
 
 CLK_STRETCHING_MODE = Literal["ENABLED", "DISABLED"]
 REPEATABILITY_SETTING = Literal["HIGH", "MEDIUM", "LOW"]
