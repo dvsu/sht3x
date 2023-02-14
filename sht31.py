@@ -7,4 +7,6 @@ I2C_ADDRESS: Final[int] = 0x44
 class SHT31(SHT3X):
 
     def __init__(self, bus_no: int):
-        super().__init__(bus_no, I2C_ADDRESS)
+        super().__init__(bus_no=bus_no,
+                         address=I2C_ADDRESS,
+                         model="SHT31")

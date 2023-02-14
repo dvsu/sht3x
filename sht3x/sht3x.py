@@ -1,10 +1,11 @@
 import sys
 from time import sleep, time
 from traceback import print_exc
+from datetime import datetime
 from dataclasses import asdict
-from typing import Final, Literal
+from typing import Final, Literal, Optional
 from smbus2 import SMBus
-from .models import Measurement, SensorData, SensorInfo
+from .models import Measurement, SensorData, SensorInfo, Sensor
 
 CLK_STRETCHING_MODE = Literal["ENABLED", "DISABLED"]
 REPEATABILITY_SETTING = Literal["HIGH", "MEDIUM", "LOW"]
@@ -40,10 +41,12 @@ REPEATABILITY: Final[dict[CLK_STRETCHING_MODE, dict[REPEATABILITY_SETTING, int]]
 
 class SHT3X:
 
-    def __init__(self, bus_no: int, address: int):
+    def __init__(self, bus_no: int, address: int, model: Optional[str]):
         self.__tracker: int = 0
         self.__bus: SMBus = None
         self.__verbose: bool = True
+        self.__model: Optional[str] = model
+
         try:
             self.__bus = SMBus(bus_no)
 
@@ -63,6 +66,7 @@ class SHT3X:
         self.__clock_stretching = CLK_STRETCHING["DISABLED"]
         self.__repeatability = REPEATABILITY["DISABLED"]["HIGH"]
         self.read_status_register()
+        self.__sensor_info = self.get_sensor_info()
 
     def crc_check(self, data: list, checksum: int) -> bool:
         return self.crc_calc(data) == checksum
@@ -170,8 +174,7 @@ class SHT3X:
         return round(100 * (data / ((2**16) - 1)), 2)
 
     def get_sensor_info(self) -> SensorInfo:
-        # TODO
-        pass
+        return SensorInfo(maker="Sensirion", model=self.__model, serial=None, version=None)
 
     def get_measurement(self, as_dict: bool = False) -> SensorData:
         if (time() - self.__tracker < 1):
@@ -194,10 +197,23 @@ class SHT3X:
         measured = SensorData([
             Measurement("temperature", "C", self.get_temperature_celsius(temp_data)),
             Measurement("temperature", "F", self.get_temperature_fahrenheit(temp_data)),
-            Measurement("relative humidity", "%", self.get_relative_humidity(humi_data))
+            Measurement("relative_humidity", "%", self.get_relative_humidity(humi_data))
         ])
 
         if as_dict == True:
             return asdict(measured)
 
         return measured
+
+    def get_full_reading(self, as_dict: bool = False) -> Sensor:
+        sensor = Sensor(maker=self.__sensor_info.maker,
+                        model=self.__sensor_info.model,
+                        serial=self.__sensor_info.serial,
+                        version=self.__sensor_info.version,
+                        timestamp=datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        measurements=self.get_measurement().measurements)
+
+        if as_dict == True:
+            return asdict(sensor)
+
+        return sensor
