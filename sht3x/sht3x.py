@@ -195,8 +195,8 @@ class SHT3X:
         self.__tracker = time()
 
         measured = SensorData([
-            Measurement("temperature", "C", self.get_temperature_celsius(temp_data)),
-            Measurement("temperature", "F", self.get_temperature_fahrenheit(temp_data)),
+            Measurement("temperature_celsius", "C", self.get_temperature_celsius(temp_data)),
+            Measurement("temperature_fahrenheit", "F", self.get_temperature_fahrenheit(temp_data)),
             Measurement("relative_humidity", "%", self.get_relative_humidity(humi_data))
         ])
 
