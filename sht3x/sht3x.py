@@ -210,7 +210,7 @@ class SHT3X:
                         model=self.__sensor_info.model,
                         serial=self.__sensor_info.serial,
                         version=self.__sensor_info.version,
-                        timestamp=datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        timestamp=datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
                         measurements=self.get_measurement().measurements)
 
         if as_dict == True:
