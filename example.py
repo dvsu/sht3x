@@ -1,14 +1,18 @@
 import sys
+from smbus2 import SMBus
 from datetime import datetime
-from sht3x import SHT35
+from sht3x import SHT31
 
-
-sensor = SHT35(1)
+bus = SMBus(1)
+sensor = SHT31(bus)
 
 
 while True:
     try:
-        print(datetime.now(), sensor.get_measurement(as_dict=True))
+        print(
+            datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            sensor.get_measurement(as_dict=True),
+        )
 
     except KeyboardInterrupt:
         sys.exit(1)

@@ -9,12 +9,14 @@ For Sensirion SHT35
 ```python
 import sys
 from datetime import datetime
+from smbus2 import SMBus
 from sht3x import SHT35
 # for Sensirion SHT31
 # from sht3x import SHT31 
 
 # I2C bus 1
-sensor = SHT35(1)
+bus = SMBus(1)
+sensor = SHT35(bus)
 
 while True:
     try:

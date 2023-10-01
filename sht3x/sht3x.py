@@ -1,6 +1,4 @@
-import sys
 from time import sleep, time
-from traceback import print_exc
 from datetime import datetime
 from dataclasses import asdict
 from typing import Final, Literal, Optional
@@ -41,18 +39,18 @@ REPEATABILITY: Final[dict[CLK_STRETCHING_MODE, dict[REPEATABILITY_SETTING, int]]
 
 class SHT3X:
 
-    def __init__(self, bus_no: int, address: int, model: Optional[str]):
+    def __init__(self, bus: SMBus, address: int, model: Optional[str]):
         self.__tracker: int = 0
-        self.__bus: SMBus = None
+        self.__bus: SMBus = bus
         self.__verbose: bool = True
         self.__model: Optional[str] = model
 
-        try:
-            self.__bus = SMBus(bus_no)
+        # try:
+        #     self.__bus = SMBus(bus_no)
 
-        except FileNotFoundError:
-            print_exc(limit=2, file=sys.stdout)
-            sys.exit(1)
+        # except FileNotFoundError:
+        #     print_exc(limit=2, file=sys.stdout)
+        #     sys.exit(1)
 
         self.__address = address
 

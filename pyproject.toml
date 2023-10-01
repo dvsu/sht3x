@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "sht3x"
+version = "0.1.0"
+description = "Python-based driver for Sensirion SHT31/35 temperature and relative humidity sensor"
+authors = ["Dave <55182282+dvsu@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+smbus2 = "^0.4.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
