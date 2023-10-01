@@ -1,9 +1,8 @@
 from time import sleep, time
 from datetime import datetime
-from dataclasses import asdict
 from typing import Final, Literal, Optional
 from smbus2 import SMBus
-from .models import Measurement, SensorData, SensorInfo, Sensor
+from .models import Measurement, SensorData, SensorInfo
 
 CLK_STRETCHING_MODE = Literal["ENABLED", "DISABLED"]
 REPEATABILITY_SETTING = Literal["HIGH", "MEDIUM", "LOW"]
@@ -40,7 +39,7 @@ REPEATABILITY: Final[dict[CLK_STRETCHING_MODE, dict[REPEATABILITY_SETTING, int]]
 class SHT3X:
 
     def __init__(self, bus: SMBus, address: int, model: Optional[str]):
-        self.__tracker: int = 0
+        self.__tracker: float = 0
         self.__bus: SMBus = bus
         self.__verbose: bool = True
         self.__model: Optional[str] = model
@@ -66,10 +65,10 @@ class SHT3X:
         self.read_status_register()
         self.__sensor_info = self.get_sensor_info()
 
-    def crc_check(self, data: list, checksum: int) -> bool:
+    def crc_check(self, data: list[int], checksum: int) -> bool:
         return self.crc_calc(data) == checksum
 
-    def crc_calc(self, data: list) -> int:
+    def crc_calc(self, data: list[int]) -> int:
         crc = 0xFF
         for i in range(2):
             crc ^= data[i]
@@ -139,8 +138,11 @@ class SHT3X:
         return "Failed" if status else "Correct"
 
     def read_status_register(self):
-        self.__bus.write_i2c_block_data(self.__address, CMD_READ_STATUS_REG[0], [CMD_READ_STATUS_REG[1]])
-        data = self.__bus.read_i2c_block_data(self.__address, REG_BASE, LEN_STATUS_REG)
+        self.__bus.write_i2c_block_data(self.__address, 
+                                        CMD_READ_STATUS_REG[0], 
+                                        [CMD_READ_STATUS_REG[1]])
+        data = self.__bus.read_i2c_block_data(self.__address, REG_BASE, 
+                                              LEN_STATUS_REG)
         status_data = data[0] << 8 | data[1]
 
         result = {
@@ -174,44 +176,36 @@ class SHT3X:
     def get_sensor_info(self) -> SensorInfo:
         return SensorInfo(maker="Sensirion", model=self.__model, serial=None, version=None)
 
-    def get_measurement(self, as_dict: bool = False) -> SensorData:
+    def get_measurement(self) -> SensorData:
         if (time() - self.__tracker < 1):
             sleep(1)
 
-        self.__bus.write_i2c_block_data(self.__address, self.__clock_stretching, [self.__repeatability])
+        self.__bus.write_i2c_block_data(self.__address, 
+                                        self.__clock_stretching, 
+                                        [self.__repeatability])
         sleep(0.05)
 
         # Read 6 bytes of raw data
         data = self.__bus.read_i2c_block_data(self.__address, REG_BASE, LEN_TEMP_HUMI_DATA)
 
+        utcnow = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+
         # Raw temperature data
-        temp_data = data[0] << 8 | data[1]
+        temp_data = (data[0] << 8) | data[1]
 
         # Raw humidity data
-        humi_data = data[3] << 8 | data[4]
+        humi_data = (data[3] << 8) | data[4]
 
         self.__tracker = time()
 
-        measured = SensorData([
-            Measurement("temperature_celsius", "C", self.get_temperature_celsius(temp_data)),
-            Measurement("temperature_fahrenheit", "F", self.get_temperature_fahrenheit(temp_data)),
-            Measurement("relative_humidity", "%", self.get_relative_humidity(humi_data))
+        measured = SensorData(self.__sensor_info, [
+            Measurement("temperature_celsius", "C", 
+                        self.get_temperature_celsius(temp_data), utcnow),
+            Measurement("temperature_fahrenheit", "F", 
+                        self.get_temperature_fahrenheit(temp_data), utcnow),
+            Measurement("relative_humidity", "%", 
+                        self.get_relative_humidity(humi_data), utcnow)
         ])
-
-        if as_dict == True:
-            return asdict(measured)
 
         return measured
 
-    def get_full_reading(self, as_dict: bool = False) -> Sensor:
-        sensor = Sensor(maker=self.__sensor_info.maker,
-                        model=self.__sensor_info.model,
-                        serial=self.__sensor_info.serial,
-                        version=self.__sensor_info.version,
-                        timestamp=datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        measurements=self.get_measurement().measurements)
-
-        if as_dict == True:
-            return asdict(sensor)
-
-        return sensor

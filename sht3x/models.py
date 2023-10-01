@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 from dataclasses import dataclass
 
 
@@ -15,13 +15,10 @@ class Measurement:
     name: str
     unit: str
     value: float
+    timestamp: str
 
 
 @dataclass
 class SensorData:
-    measurements: List[Measurement]
-
-
-@dataclass
-class Sensor(SensorInfo, SensorData):
-    timestamp: str
+    sensor: SensorInfo
+    measurements: list[Measurement]

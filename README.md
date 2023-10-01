@@ -2,14 +2,15 @@
 
 Python-based driver for Sensirion SHT31/35 temperature and relative humidity sensor. Tested on Raspberry Pi Zero/ZeroW/3B+/4B
 
-# Usage
+## Usage
 
 For Sensirion SHT35
 
 ```python
 import sys
-from datetime import datetime
+import json
 from smbus2 import SMBus
+from dataclasses import asdict
 from sht3x import SHT35
 # for Sensirion SHT31
 # from sht3x import SHT31 
@@ -20,8 +21,8 @@ sensor = SHT35(bus)
 
 while True:
     try:
-        print(datetime.now(), sensor.get_measurement(as_dict=True))
-        print(datetime.now(), sensor.get_full_reading(as_dict=True))
+        print(json.dumps(asdict(sensor.get_measurement()), indent=2))
+
     except KeyboardInterrupt:
         sys.exit(1)
 
@@ -33,50 +34,30 @@ Example output
 
 ```json
 {
+  "sensor": {
+    "maker": "Sensirion",
+    "model": "SHT35",
+    "serial": null,
+    "version": null
+  },
   "measurements": [
     {
       "name": "temperature", 
       "unit": "C",
-      "value": 27.95
+      "value": 27.95,
+      "timestamp": "2023-10-01T01:23:45Z"
     }, 
     {
       "name": "temperature", 
       "unit": "F",
-      "value": 82.3
+      "value": 82.3,
+      "timestamp": "2023-10-01T01:23:45Z"
     },
     {
       "name": "relative_humidity",
       "unit": "%",
-      "value": 54.98
-    }
-  ]
-}
-```
-
-`get_full_reading()`
-
-```json
-{
-  "maker": "Sensirion",
-  "model": "SHT35",
-  "serial": null,
-  "version": null,
-  "timestamp": "2023-02-14T18:08:24Z",
-  "measurements": [
-    {
-      "name": "temperature", 
-      "unit": "C", 
-      "value": 29.36
-    }, 
-    {
-      "name": "temperature",
-      "unit": "F",
-      "value": 84.85
-    }, 
-    {
-      "name": "relative_humidity",
-      "unit": "%",
-      "value": 52.62
+      "value": 54.98,
+      "timestamp": "2023-10-01T01:23:45Z"
     }
   ]
 }
