@@ -1,7 +1,9 @@
-import sys
 import json
-from smbus2 import SMBus
+import sys
 from dataclasses import asdict
+
+from smbus2 import SMBus
+
 from sht3x import SHT31
 
 bus = SMBus(1)
