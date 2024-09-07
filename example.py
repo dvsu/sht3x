@@ -1,6 +1,4 @@
-import json
 import sys
-from dataclasses import asdict
 
 from smbus2 import SMBus
 
@@ -12,7 +10,7 @@ sensor = SHT31(bus)
 
 while True:
     try:
-        print(json.dumps(asdict(sensor.get_measurement()), indent=2))
+        print(sensor.get_measurement().model_dump_json(indent=2))
 
     except KeyboardInterrupt:
         sys.exit(1)

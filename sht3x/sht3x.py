@@ -174,7 +174,11 @@ class SHT3X:
         # Read 6 bytes of raw data
         data = self.__bus.read_i2c_block_data(self.__address, REG_BASE, LEN_TEMP_HUMI_DATA)
 
-        utcnow = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        datetime_now = datetime.now(timezone.utc)
+
+        utc_string = datetime_now.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        timestamp_nanosec = int(datetime.timestamp(datetime_now) * 10**9)
 
         # Raw temperature data
         temp_data = (data[0] << 8) | data[1]
@@ -185,19 +189,28 @@ class SHT3X:
         self.__tracker = time()
 
         measured = SensorData(
-            self.__sensor_info,
-            [
+            sensor=self.__sensor_info,
+            measurements=[
                 Measurement(
-                    "temperature_celsius", "C", self.get_temperature_celsius(temp_data), utcnow
+                    name="temperature_celsius",
+                    unit="C",
+                    value=self.get_temperature_celsius(temp_data),
+                    datetime_utc=utc_string,
+                    timestamp_nanosec=timestamp_nanosec,
                 ),
                 Measurement(
-                    "temperature_fahrenheit",
-                    "F",
-                    self.get_temperature_fahrenheit(temp_data),
-                    utcnow,
+                    name="temperature_fahrenheit",
+                    unit="F",
+                    value=self.get_temperature_fahrenheit(temp_data),
+                    datetime_utc=utc_string,
+                    timestamp_nanosec=timestamp_nanosec,
                 ),
                 Measurement(
-                    "relative_humidity", "%", self.get_relative_humidity(humi_data), utcnow
+                    name="relative_humidity",
+                    unit="%",
+                    value=self.get_relative_humidity(humi_data),
+                    datetime_utc=utc_string,
+                    timestamp_nanosec=timestamp_nanosec,
                 ),
             ],
         )

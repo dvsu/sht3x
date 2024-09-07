@@ -9,6 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.9"
 smbus2 = "^0.4.3"
+pydantic = "^2.9.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6.4"

@@ -1,24 +1,23 @@
-from dataclasses import dataclass
 from typing import Optional
 
+from pydantic import BaseModel
 
-@dataclass
-class SensorInfo:
+
+class SensorInfo(BaseModel):
     maker: str
     model: Optional[str]
     serial: Optional[str]
     version: Optional[str]
 
 
-@dataclass
-class Measurement:
+class Measurement(BaseModel):
     name: str
     unit: str
     value: float
-    timestamp: str
+    datetime_utc: str
+    timestamp_nanosec: int
 
 
-@dataclass
-class SensorData:
+class SensorData(BaseModel):
     sensor: SensorInfo
     measurements: list[Measurement]
